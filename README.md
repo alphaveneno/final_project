@@ -95,9 +95,9 @@ is a command which will do this on a POSIX system (Linux, MacOS)
 
 ## superuser
 
-username: **advw**
+username: **admin**
 
-password: **advw** (same as user name)
+password: **admin** (same as user name)
 
 ## the registrants (dummy data/users)
 
