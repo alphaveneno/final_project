@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--'load static' will enable access to static/auxiliary.css (stylesheet)-->
+{% load static %}
+
+<head>
+
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap5 CSS -->
+	<link rel="stylesheet" type="text/css" href="{% static 'skin_support/bootstrap.min.css' %}">
+
+	<!--custom stylesheet in "static" folder-->
+	<link rel="stylesheet" type="text/css" href="{% static 'skin_support/auxiliary.css' %}">
+
+	<!--enables Bootsrap5 hamburger menu-->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<!--title passed to the page, if empty no title-->
+	{% if title %}
+	<title>Dermatological Diagnostic Support - {{title}}</title>
+	{%else%}
+	<title>Dermatological Diagnostic Support</title>
+	{% endif %}
+</head>
+
+<body>
+
+	<header class="site-header pb-5 fixed-top">
+		<div class="flex-container">
+			<div class="mr-4 bs-gray-900">
+				<h2 class="text-center pt-3 ps-3">Dermatological Diagnostic Support</h2>
+				{% if user.username %}
+				<p class="text-center">Welcome, {{user.username}}</p>
+				{% endif %}
+			</div>
+		</div>
+		<!--navigation bar-->
+		<nav class="navbar navbar-expand-md navbar-dark bg-steel">
+			<div class="container-fluid">
+				<!--bootstrap hamburger menu-->
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle"
+				aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbarToggle">
+					<div class="navbar-nav mr-auto">
+						<a class="nav-item nav-link" href="{% url 'about'%}">About</a>
+						{% if user.is_authenticated %}
+						<a class="nav-item nav-link" href="{% url 'home' %}">Home</a>
+						<a class="nav-item nav-link" href="{% url 'users_list' %}">Add New Colleagues</a>
+						<div style="color:yellow" class="flex-dropdown" aria-label="chatroom drop-down menu">
+							<p style="margin:0; text-align:center">Chat Rooms</p>
+							<!--drop-down menu with six chat rooms to choose from-->
+							<!--The value in <option> must not have any spaces, use underscores-->
+							<select class="nav-item nav-link" id="room-name-input" type="text">
+								<option>Diagnosis_Discussion</option>
+								<option>Research_News</option>
+								<option>Dermatopathology</option>
+								<option>Equipment</option>
+								<option>Treatment_Updates</option>
+								<option>Cancer_Prevention</option>
+							</select>
+						</div>
+						<a class="nav-item nav-link" href="{% url 'colleague_list' %}">Colleagues</a>
+						<a class="nav-item nav-link" href="{% url 'my_profile' %}">Profile</a>
+						<a class="nav-item nav-link" href="{% url 'post-create' %}">Create Post</a>
+						<a class="nav-item nav-link" href="{% url 'password_reset' %}">Change Your Password</a>
+						<form method="post" action="{% url 'logout' %}">
+							{% csrf_token %}
+							<button id="logout" type="submit"
+								class="nav-item nav-link btn btn-danger ml-4 text-light">Logout</button>
+						</form>
+
+						<!--search form only accessible when logged in-->
+						{% block searchform %}
+						{% endblock searchform %}
+						{% else %}
+						<a class="nav-item nav-link btn btn-success ml-4  text-light" href="{% url 'login' %}">Login</a>
+						<a class="nav-item nav-link btn btn-info ml-3  text-light"
+							href="{% url 'register' %} ">Register</a>
+						{% endif %}
+
+					</div>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<!--if there are any messages, 
+    these will appear on all pages
+  		but only once-->
+	<main role="main" class="container-fluid" style="padding-top: 150px;" >
+		<div class="row">
+			<div class="col-md-8">
+				{% if messages%}
+				{% for message in messages%}
+
+				<!--bootstrap styling depends on the nature of the message-->
+				<!--e.g; message.success, message.error, message.warning, etc.-->
+				<div class="alert alert-{{message.tags }}">
+					{{message}}
+				</div>
+				{% endfor%}
+				{%endif%}
+
+				{% block content %}
+				{% endblock %}
+			</div>
+
+			<!--side bar for all pages-->
+			<div class="col-md-4" style="padding-top: 100px;">
+				<div class="content-section">
+					<h3>Trending ... </h3>
+					<p class='text-muted' aria-description="a list of current cases of particular interest to members">Hottest Cases
+					<ul class="list-group">
+						<li class="list-group-item list-group-item-light">Bathing suit nevus</li>
+						<li class="list-group-item list-group-item-light">Fever and palmar rash</li>
+						<li class="list-group-item list-group-item-light">Lyme Disease</li>
+						<li class="list-group-item list-group-item-light">Kaposi's sarcoma</li>
+					</ul>
+					</p>
+				</div>
+			</div>
+		</div>
+	</main>
+
+
+	<!-- JS Files -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script> 
+
+	<!--script for the chat rooms-->
+	<script type="module">
+		// handles chat room submission from keyboard
+		document.querySelector('#room-name-input').focus();
+		document.querySelector('#room-name-input').onkeyup = function (e) {
+			if (e.keyCode === 13) {  // enter, return
+				document.querySelector('#room-name-input').click();
+			}
+		};
+
+		// handles chat room submission with mouse click
+		document.querySelector('#room-name-input').focus();
+		document.querySelector('#room-name-input').onclick = function (e) {
+			let roomName = document.querySelector('#room-name-input').value;
+			window.location.pathname = '/chat/' + roomName + '/';
+		};
+	</script>
+
+	<!--script for Endorse button:
+		AJAX script updates the endorsements without page refresh
+		the QuerySet for "def endorse(request)" in views.py
+		is generated here.
+		in "home.html", the id# of the post (taken from the database)
+		is passed to - and made the id of - the button-->
+
+	<script type="module">
+		const endorseButtons = document.getElementsByClassName('endorse');
+
+		// add an eventlistener to every endorse button on every post
+		// 'endorsebuttons' is a HTML Collection, therefore
+		// must use Array.from() to convert it to an array
+		// in order to use forEach() iterator
+		Array.from(endorseButtons).forEach(function(button,index, array) 
+		{
+    		button.addEventListener('click', handleClick);
+		});
+
+		function handleClick(e) 
+		{
+			e.preventDefault();
+
+			// get values for 'href' and 'id' from the button
+			// href is always '/endorse/'
+			const id = this.id;
+			const href = this.querySelector('a').href;
+			const xhr = new XMLHttpRequest();
+
+			// update the color, endorse count and text 
+			// of the button without page refresh
+			xhr.onreadystatechange = function() 
+			{
+				if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) 
+				{
+					const response = JSON.parse(xhr.responseText);
+
+					// if the user endorses the post the count is incremented
+					// the text is set to "Unendorse" and the button color changes to yellow
+					if (response.endorsed) 
+					{
+						const count = response.endorses;
+						document.getElementById('endorsebtn' + id).innerHTML = 'Unendorse';
+						document.getElementById('post' + id).innerHTML = count;
+						document.getElementById('endorsebtn' + id).style.color = 'yellow';
+
+					// if the user unendorses the post the count is decremented
+					// the text is set to "Endorse" and the button color changes to purple
+					} else {
+						const count = response.endorses;
+						document.getElementById('endorsebtn' + id).innerHTML = 'Endorse';
+						document.getElementById('post' + id).innerHTML = count;
+						document.getElementById('endorsebtn' + id).style.color = 'purple';
+					}
+				}
+			};
+			// send the id of the selected button to views.endorse,
+			// along with the URL (href is the variable for the URL)
+			// to 'def endorse(self)' in views.py
+			xhr.open('GET', href+'?endorseId=' + id, true);
+			xhr.send();
+		}
+	</script>
+
+</body>
+
+</html>

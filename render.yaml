@@ -1,0 +1,19 @@
+databases:
+  - name: dpg-cn237ogcmk4c73ddic8g-a
+    databaseName: skin
+    user: skin_user
+
+services:
+  - type: web
+    name: skin
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn derm_project.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        value: "postgres://skin_user:6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7@dpg-cn237ogcmk4c73ddic8g-a/skin"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+

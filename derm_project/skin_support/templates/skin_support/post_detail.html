@@ -1,0 +1,233 @@
+{% extends "skin_support/layout.html" %}
+<!---->
+{% load static %}
+<!---->
+{% load crispy_forms_tags %}
+<!---->
+{% block searchform %}
+<form class="form-inline my-2 my-lg-0 ml-5" action="{% url 'search_posts' %}" method="get">
+	<input name="p" type="text" placeholder="Search posts by tags.." aria-label="Search posts by tags">
+	<button class="btn btn-success my-2 my-sm-0 ml-4" type="submit">Search</button>
+</form>
+{% endblock searchform %}
+
+{% block content %}
+<h1>POST-DETAIL</h1>
+<div class="container">
+	<div class="row">
+		<div class="col-md-8">
+			<div class="card card-signin my-5" aria-label="The original post for this thread">
+				<div class="card-body">
+					<a href="{{ post.user_name.profile.get_absolute_url }}"><img
+							src="{{ post.user_name.profile.image.url }}" class="rounded-circle" width="30" height="30"
+							alt="{{post.user_name}}"></a>
+					<a class="text-light"
+						href="{{ post.user_name.profile.get_absolute_url }}"><b>{{post.user_name}}</b></a>
+					<br><small class="text-muted">Posted on {{ post.date_posted }}</small>
+					<br><br>
+					<p class="card-text text-light">Age: {{ post.age }}</p>
+					<p class="card-text text-light">Gender: {{ post.gender }}</p>
+					<p class="card-text text-light">Ethnicity: {{ post.ethnicity }}</p>
+					<p class="card-text text-light">Country: {{ post.country }}</p>
+					<p class="card-text text-light">Location on body: {{ post.skin_location }}</p>
+					<p class="card-text text-light">History: {{ post.history }}</p>
+					<p class="card-text text-white"><b>Provisional Diagnosis: {{ post.provdx }}</b></p>
+					<p class="card-text text-light">Differential Diagnosis#1: {{ post.ddx1 }}</p>
+					<p class="card-text text-light">Differential Diagnosis#2: {{ post.ddx2 }}</p>
+				</div>
+				<a href="{{ post.pic1.url }}"><img class="card-img-top" src="{{ post.pic1.url }}"
+						alt="{{ post.provdx }}"></a>
+				<a href="{{ post.pic2.url }}">
+					<img class="card-img-top" 
+					{%comment%}if poster did not post a second or third image
+					'blank.png' is inserted, 
+					which is just a small PNG image
+					that matches the color of the background.
+					In that case no alt text is displayed.
+					{%endcomment%}
+						src="{{ post.pic2.url }}" 
+						alt="{% if post.pic2.url is not '/media/pics/blank.png' %}{{ post.provdx }}{% endif %}"></a>
+				<a href="{{ post.pic3.url }}">
+					<img class="card-img-top" 
+					     src="{{ post.pic3.url }}" 
+						 alt="{% if post.pic3.url is not '/media/pics/blank.png' %}{{ post.provdx }}{% endif %}"></a>
+				{% if post.tags %}
+				<br>
+				<p class="text-danger ml-3"><b>Tags: <i>{{ post.tags }}</i></b></p>
+				{% endif %}
+				<div class="card-footer">
+					{% if request.user != post.user_name %}
+					<button class="btn btn-white mr-3 endorse" id="{{ post.id }}">
+						{% if post in endorsed_post %}
+						<a
+						href="{% url 'post-endorse' %}"
+						style="color: yellow"
+						id="endorsebtn{{ post.id }}"
+						>
+						Unendorse</a
+						>
+						<p id="post{{post.id}}" 
+						   aria-label="The number of endorsements of this post">{{post.endorses.count}}</p>
+						{% else %}
+						<a
+						href="{% url 'post-endorse' %}"
+						style="color: purple"
+						id="endorsebtn{{ post.id }}"
+						>
+						Endorse</a
+						>
+						<p id="post{{post.id}}"
+						   aria-label="The number of endorsements of this post">{{post.endorses.count}}</p>
+						{% endif %}
+					</button>
+					{% else %}
+					<button
+						class="btn btn-white mr-3 endorse"
+						id="{{ post.id }}"
+						disabled
+					>
+					<a href="#" style="color: grey" id="endorsebtn{{ post.id }}">
+					Endorsements of your post</a
+					>
+					<p id="post{{post.id}}" style="color: yellow">
+					{{post.endorses.count}}
+					</p>
+					</button>
+					{% endif %}
+
+					{%comment %}
+					If the user is looking at his own post, he can update or delete it
+					 {% endcomment %}
+					{% if post.user_name == user %}
+					<a class="btn btn-outline-info mr-3" href="{% url 'post-update' post.id %}">Update</a>
+					<a class="btn btn-outline-danger" href="{% url 'post-delete' post.id %}">Delete</a>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<h4>Comments</h4>
+	<div class="row">
+		<div class="col-md-8">
+			{% if post.details.all %}
+			<div class="card card-signin my-5" aria-label="a comment on this post">
+				<!---'details' is a 'related name' declared in the 'post' field of the Comments model;
+					 it is a list of post comments-->
+				{% for detail in post.details.all %}
+					<div class="card-body">
+						<a href="{{ detail.username.profile.get_absolute_url }}">
+							<img src="{{ detail.username.profile.image.url }}" class="rounded-circle" width="30" height="30"
+								alt="{{detail.username}}">
+						</a>
+						<a class="text-light"
+							href="{{ detail.username.profile.get_absolute_url }}"><b>{{detail.username}}</b></a>
+						<br><small>{{ detail.comment_date }}</small><br><br>
+						<p class="card-text text-white"><b>Provisional Diagnosis: {{ detail.provdx }}</b></p>
+						<p class="card-text text-light">Differential Diagnosis#1: {{ detail.ddx1 }}</p>
+						<p class="card-text text-light">Differential Diagnosis#2: {{ detail.ddx2 }}</p>
+						<p class="card-text text-light">Comment: {{ detail.comment }}</p>
+						{% if detail.tags %}
+						<p class="text-danger ml-3"><b>Tags: <i>{{ detail.tags }}</i></b></p>
+						{% endif %}
+					</div>
+					{% if request.user != detail.username %}
+						<button class="btn btn-white mr-3 vote" id="{{ detail.id }}">
+							{% if request.user.id in detail.vote %}
+								<a href="{% url 'comment-vote' %}" style="color: green" id="votebtn{{ detail.id }}">DownVote</a>
+							{% else %}
+								<a href="{% url 'comment-vote' %}" style="color: red" id="votebtn{{ detail.id }}">UpVote</a>
+							{% endif %}
+							<p id="comment{{detail.id}} aria-label="The number of endorsements of this comment">{{detail.votes.count}}</p>
+						</button>
+					{% else %}
+						<button class="btn btn-white mr-3 vote" 
+						        id="{{ comment.id }}" 
+						        disabled>
+							<a href="#" style="color: grey" id="votebtn{{ detail.id }}">Upvotes/Downvotes of your Comment</a>
+							<p id="comment{{detail.id}}" 
+							   style="color: paleblue" 
+							   aria-label="The number of endorsements of this comment">{{detail.votes.count}}</p>
+						</button>
+					{% endif %}
+
+					<hr class="my-1">
+				{% endfor %}
+			</div>
+			{% else %}
+			<p>No comments to show!</p>
+			{% endif %}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-8">
+			<div class="card card-signin my-5">
+				<div class="card-body">
+					<!--text field for posting a comment-->
+					<form class="form-signin" method="POST" aria-label="post a comment here">
+						{% csrf_token %}
+						<fieldset class="form-group"><br>
+							{{ form|crispy }}
+						</fieldset>
+						<div class="form-group">
+							<button class="btn btn-lg btn-primary btn-block text-uppercase"
+								type="submit">Comment</button><br>
+						</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- JS Files -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script> 
+
+<script type="module">
+		const voteButtons = document.getElementsByClassName('vote');
+
+		// add an eventlistener to every vote button on every comment
+		// 'votebuttons' is a HTML Collection, therefore
+		// must use Array.from() to convert it to an array
+		// in order to use forEach() iterator
+		Array.from(voteButtons).forEach(function(button,index, array) 
+		{
+    		button.addEventListener('click', handleClick);
+		});
+
+		function handleClick(e) 
+		{
+			e.preventDefault();
+
+			// get 'href' and 'id' from the button
+			const id = this.id;
+			const href = this.querySelector('a').href;
+			const xhr = new XMLHttpRequest();
+
+			// update the color, vote count and text 
+			// of the button without page refresh
+			xhr.onreadystatechange = function() 
+			{
+				if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) 
+				{
+					const response = JSON.parse(xhr.responseText);
+					if (response.upvoted) 
+					{
+						const count = response.upvotes;
+						document.getElementById('votebtn' + id).innerHTML = 'DownVote';
+						document.getElementById('comment' + id).innerHTML = count;
+						document.getElementById('votebtn' + id).style.color = 'green';
+					} else {
+						const count = response.upvotes;
+						document.getElementById('votebtn' + id).innerHTML = 'UpVote';
+						document.getElementById('comment' + id).innerHTML = count;
+						document.getElementById('votebtn' + id).style.color = 'red';
+					}
+				}
+			};
+			// send the id of the selected button to views.vote,
+			// along with the URL for def vote(self) in views.py
+			xhr.open('GET', href+'?voteId=' + id, true);
+			xhr.send();
+		}
+	</script>
+{% endblock content %}

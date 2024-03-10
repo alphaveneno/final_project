@@ -1,0 +1,112 @@
+{% extends "skin_support/layout.html" %}
+<!---->
+{% load static %}
+<!---->
+{% block searchform %}
+<!---->
+<form class="form-inline my-2 my-lg-0 ml-5" action="{% url 'search_posts' %}" method="get">
+  <input name="p" type="text" placeholder="Search posts.." aria-label="Search posts">
+  <button class="btn btn-success my-2 my-sm-0 ml-4" type="submit">
+    Search
+  </button>
+</form>
+{% endblock searchform %}
+<!---->
+{% block content %}
+<h1>SEARCH_POSTS</h1>
+<div class="container">
+  <div class="row">
+    <div class="col-md-8">
+      {% if not posts %}
+      <br>
+      <h2><i>No posts match the tag provided!</i></h2>
+      {% endif %}
+      <!---->
+      {% for post in posts %}
+      <div class="card card-signin my-5" aria-label="a list of posts which match your search">
+        <div class="card-body">
+          <a href="{{ post.user_name.profile.get_absolute_url }}"><img src="{{ post.user_name.profile.image.url }}"
+              class="rounded-circle" width="30" height="30" alt="{{ post.user_name }}"></a>
+          <a class="text-light" href="{{ post.user_name.profile.get_absolute_url }}"><b>{{ post.user_name }}</b></a>
+          <br>
+          <small class="text-muted">Posted on {{ post.date_posted }}</small>
+          <br><br>
+          <p class="card-text text-light">Age: {{ post.age }}</p>
+          <p class="card-text text-light">Gender: {{ post.gender }}</p>
+          <p class="card-text text-light">Ethnicity: {{ post.ethnicity }}</p>
+          <p class="card-text text-light">Country: {{ post.country }}</p>
+          <p class="card-text text-light">Location on body: {{ post.skin_location }}</p>
+          <p class="card-text text-light">History: {{ post.history }}</p>
+          <p class="card-text text-white"><b>Provisional Diagnosis: {{ post.provdx }}</b></p>
+          <p class="card-text text-light">Differential Diagnosis#1: {{ post.ddx1 }}</p>
+          <p class="card-text text-light">Differential Diagnosis#2: {{ post.ddx2 }}</p>
+        </div>
+        <a href="{% url 'post-detail' post.id %}">
+          <img class="card-img-top" 
+               src="{{ post.pic1.url }}" 
+               alt="{{ post.provdx }}"></a>
+        <a href="{% url 'post-detail' post.id %}">
+          <img class="card-img-top" 
+               src="{{ post.pic2.url }}" 
+               alt="{% if post.pic2.url != '/media/pics/blank.png' %}{{ post.provdx }}{% endif %}"></a>
+        <a href="{% url 'post-detail' post.id %}">
+          <img class="card-img-top" 
+              {%comment%}if poster did not post a second or third image
+              'blank.png' is inserted, 
+              which is just a small PNG image
+              that matches the color of the background.
+              In that case no alt text is displayed.
+              {%endcomment%}
+               src="{{ post.pic3.url }}" 
+               alt="{% if post.pic3.url != '/media/pics/blank.png' %}{{ post.provdx }}{% endif %}"></a>
+        {% if post.tags %}
+          <br>
+          <p class="text-danger ml-3">
+            <b>Tags: <i>{{ post.tags }}</i></b>
+          </p>
+        {% endif %}
+        <div class="card-footer">
+					{% if request.user != post.user_name %}
+					<button class="btn btn-white mr-3 endorse" id="{{ post.id }}">
+						{% if post in endorsed_post %}
+						<a
+						href="{% url 'post-endorse' %}"
+						style="color: yellow"
+						id="endorsebtn{{ post.id }}"
+						>
+						Unendorse</a
+						>
+						<p id="post{{post.id}}" aria-label="The number of endorsements of this comment">{{post.endorses.count}}</p>
+						{% else %}
+						<a
+						href="{% url 'post-endorse' %}"
+						style="color: purple"
+						id="endorsebtn{{ post.id }}"
+						>
+						Endorse</a
+						>
+						<p id="post{{post.id}}" aria-label="The number of endorsements of this comment">{{post.endorses.count}}</p>
+						{% endif %}
+					</button>
+					{% else %}
+					<button
+						class="btn btn-white mr-3 endorse"
+						id="{{ post.id }}"
+						disabled
+					>
+					<a href="#" style="color: grey" id="endorsebtn{{ post.id }}">
+					Endorsements of your post</a
+					>
+					<p id="post{{post.id}}" style="color: yellow">
+					{{post.endorses.count}}
+					</p>
+					</button>
+					{% endif %}
+          <a class="btn btn-outline-info" href="{% url 'post-detail' post.id %}">Comments | {{ post.details.count }}</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

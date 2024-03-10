@@ -1,0 +1,31 @@
+{%extends "skin_support/layout.html"%}
+<!---->
+{% block searchform %}
+<form
+  class="form-inline my-2 my-lg-0 ml-5"
+  action="{% url 'search_posts' %}"
+  method="get"
+>
+  <input name="p" 
+         type="text" 
+         placeholder="Search posts.." 
+         aria-label="Search posts">
+  <button class="btn btn-success my-2 my-sm-0 ml-4" type="submit">
+    Search
+  </button>
+</form>
+{% endblock searchform %}
+<!---->
+{% block content %}
+<div class="ps-5">
+  <h1>About Page</h1>
+  <h2>a collaborative website</h2>
+  <p><strong>CM 3070 Final Project</strong></p>
+  <p>
+    University of London, Goldsmiths College, Bachelor of Science in Computing
+  </p>
+  <p>student #: 200527723</p>
+
+  <p>submitted Mar. 11, 2024</p>
+</div>
+{% endblock content %}
