@@ -163,7 +163,7 @@ for swagger-UI:
 
 ## render.com
 
-Hostname: dpg-cn237ogcmk4c73ddic8g-a
+Hostname:
 
 Port: 5432
 
@@ -172,7 +172,6 @@ Database: skin
 Username: skin_user
 
 ### password:
-6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7
 
 ### internal database URL:
 postgres://skin_user:6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7@dpg-cn237ogcmk4c73ddic8g-a/skin
@@ -181,7 +180,6 @@ postgres://skin_user:6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7@dpg-cn237ogcmk4c73ddic8g-a
 postgres://skin_user:6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7@dpg-cn237ogcmk4c73ddic8g-a.oregon-postgres.render.com/skin
 
 ### PSQL command:
-PGPASSWORD=6TneHW2w5HZSh0MoFs8E9Oyye8eK10F7 psql -h dpg-cn237ogcmk4c73ddic8g-a.oregon-postgres.render.com -U skin_user skin
 
 
 
